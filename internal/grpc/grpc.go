@@ -15,8 +15,23 @@ type Auth struct {
 	Env config.Env
 }
 
-func (a *Auth) SignUp(ctx context.Context, req *auth.SignUpRequest) (*auth.SignUpResponse, error) {
+func (a *Auth) SignIn(ctx context.Context, req *auth.SignInRequest) (*auth.SignInResponse, error) {
 	id, err := a.DB.CheckExist(req.Login, req.Password)
+	if err != nil {
+		return &auth.SignInResponse{}, err
+	}
+	tokens, err := myjwt.CreateTokens(id, "user", a.Env)
+	if err != nil {
+		return &auth.SignInResponse{}, err
+	}
+	if err = a.DB.RefreshUpdate(id, tokens.RefreshToken); err != nil {
+		return &auth.SignInResponse{}, err
+	}
+	return &auth.SignInResponse{UserUuid: id.String(), JwtToken: tokens.AccessToken}, nil
+}
+
+func (a *Auth) SignUp(ctx context.Context, req *auth.SignUpRequest) (*auth.SignUpResponse, error) {
+	id, err := a.DB.Create(req.Login, req.Password)
 	if err != nil {
 		return &auth.SignUpResponse{}, err
 	}
@@ -28,21 +43,6 @@ func (a *Auth) SignUp(ctx context.Context, req *auth.SignUpRequest) (*auth.SignU
 		return &auth.SignUpResponse{}, err
 	}
 	return &auth.SignUpResponse{UserUuid: id.String(), JwtToken: tokens.AccessToken}, nil
-}
-
-func (a *Auth) SignIn(ctx context.Context, req *auth.SignInRequest) (*auth.SignInResponse, error) {
-	id, err := a.DB.Create(req.Login, req.Password)
-	if err != nil {
-		return &auth.SignInResponse{}, err
-	}
-	tokens, err := myjwt.CreateTokens(id, "user", a.Env)
-	if err != nil {
-		return &auth.SignInResponse{}, err
-	}
-	if err = a.DB.RefreshUpdate(id, tokens.RefreshToken); err != nil {
-		return &auth.SignInResponse{}, err
-	}
-	return &auth.SignInResponse{UserUuid: id.String()}, nil
 }
 
 func (a *Auth) ValidationToken(ctx context.Context, req *auth.ValidateJwtTokenRequest) (*auth.ValidateJwtTokenResponse, error) {

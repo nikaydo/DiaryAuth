@@ -12,8 +12,8 @@ tasks:
   migr_up:
     desc: "Сделать миграцию"
     cmds:
-      - goose -dir migrations postgres "postgres://appuser:password@postgres:5432/user?sslmode=disable" up
+      - goose -dir migrations postgres "" up
   migr_down:
     desc: "Сделать миграцию"
     cmds:
-      - goose -dir migrations postgres "postgres://appuser:password@postgres:5432/user?sslmode=disable" down
+      - goose -dir migrations postgres "" down

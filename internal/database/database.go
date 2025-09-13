@@ -45,7 +45,7 @@ func (db *Database) Delete(id uuid.UUID) error {
 }
 
 func (db *Database) RefreshUpdate(id uuid.UUID, refresh string) error {
-	if _, err := db.Pool.Exec(context.Background(), "UPDATE users SET refresh = $1 WHERE uuid = $2;", id, refresh); err != nil {
+	if _, err := db.Pool.Exec(context.Background(), "UPDATE users SET refresh_token = $1 WHERE uuid = $2;", refresh, id); err != nil {
 		return err
 	}
 	return nil
@@ -53,7 +53,7 @@ func (db *Database) RefreshUpdate(id uuid.UUID, refresh string) error {
 
 func (db *Database) GetRefresh(id uuid.UUID) (string, error) {
 	var refresh string
-	if err := db.Pool.QueryRow(context.Background(), "SELECT refresh FROM users WHERE uuid = $1;", id).Scan(&refresh); err != nil {
+	if err := db.Pool.QueryRow(context.Background(), "SELECT refresh_token FROM users WHERE uuid = $1;", id).Scan(&refresh); err != nil {
 		return refresh, err
 	}
 	return refresh, nil
