@@ -1,0 +1,19 @@
+version: '3'
+env:
+  POSTGRESQL: ${POSTGRESQL}
+
+tasks:
+  migr:
+    desc: "Сделать миграцию"
+    cmds:
+      - |
+        read -p "Введите название миграции: " name && \
+        goose -dir migrations create "$name" sql
+  migr_up:
+    desc: "Сделать миграцию"
+    cmds:
+      - goose -dir migrations postgres "postgres://appuser:password@postgres:5432/user?sslmode=disable" up
+  migr_down:
+    desc: "Сделать миграцию"
+    cmds:
+      - goose -dir migrations postgres "postgres://appuser:password@postgres:5432/user?sslmode=disable" down
